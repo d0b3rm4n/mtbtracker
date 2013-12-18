@@ -16,7 +16,8 @@ SOURCES += src/harbour-mtbtracker.cpp \
     src/gpsservice.cpp \
     src/db/trackingdatabase.cpp \
     src/maincontroller.cpp \
-    src/db/track.cpp
+    src/db/track.cpp \
+    src/db/trackpoint.cpp
 
 OTHER_FILES += qml/harbour-mtbtracker.qml \
     qml/cover/CoverPage.qml \
@@ -31,5 +32,6 @@ HEADERS += \
     src/db/trackingdatabase.h \
     src/maincontroller.h \
     src/common.h \
-    src/db/track.h
+    src/db/track.h \
+    src/db/trackpoint.h
 

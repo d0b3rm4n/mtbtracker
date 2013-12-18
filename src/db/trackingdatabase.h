@@ -9,6 +9,7 @@
 #include <QStandardPaths>
 
 #include "../common.h"
+#include "track.h"
 
 #define DATABASE_NAME "/tracking.sqlite"
 #define DATABASE_VERSION 1
@@ -21,8 +22,13 @@ public:
 
     bool openDatabase();
 
+public slots:
+    void saveTrack(Track *track);
+
 private:
     QSqlDatabase mDB;
+
+    int getNewTrackID();
 
 signals:
 

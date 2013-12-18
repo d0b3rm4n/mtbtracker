@@ -19,7 +19,8 @@ int main(int argc, char *argv[])
     view->setSource(SailfishApp::pathTo("qml/harbour-mtbtracker.qml"));
     view->show();
 
-    MainController *controller = new MainController();
+    MainController *controller = new MainController(*view);
+    controller->makeConnections();
 
     return QGuiApplication::exec();
 }

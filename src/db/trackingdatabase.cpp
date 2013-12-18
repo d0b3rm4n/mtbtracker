@@ -54,6 +54,7 @@ bool TrackingDatabase::openDatabase()
         bool retVal = query.exec("CREATE TABLE tracks"
                                  "( id integer primary key, "
                                  "  trackname text, "
+                                 "  finished integer, "
                                  "  date text )");
         if ( retVal ) {
             qDebug() << "Database table tracks created successfully";
@@ -66,11 +67,13 @@ bool TrackingDatabase::openDatabase()
     if ( !dbTables.contains("trackingdata") ) {
         QSqlQuery query;
         bool retVal = query.exec("CREATE TABLE trackingdata"
-                                 "( id integer primary key AUTOINCREMENT, "
+                                 "( globalid integer primary key AUTOINCREMENT, "
                                  "  trackid integer, "
+                                 "  pointid integer, "
                                  "  longitude real,"
                                  "  latitude real,"
-                                 "  height real,"
+                                 "  altitude real,"
+                                 "  groundspeed real,"
                                  "  verticalaccuracy integer,"
                                  "  horizontalaccuracy integer"
                                  ")");
@@ -82,4 +85,49 @@ bool TrackingDatabase::openDatabase()
         }
     }
     return true;
+}
+
+
+/**
+  Saves track, if already in database updates it
+ * @brief TrackingDatabase::saveTrack
+ * @param track
+ */
+void TrackingDatabase::saveTrack(Track *track)
+{
+    qDebug() << "Writing track to SQL database";
+    int trackID = getNewTrackID();
+    // iterate over all waypoints and save the track
+    for ( int i = 0; i < track->getPointCount(); i++ ) {
+        QSqlQuery query;
+        TrackPoint *point = track->getTrackingPoint(i);
+        bool retVal = query.prepare("INSERT INTO trackingdata (trackid, pointid, "
+                      "longitude, latitude, altitude, groundspeed, "
+                      "verticalaccuracy, horizontalaccuracy ) "
+                      "VALUES ("
+                      ":trackid, :pointid, "
+                      ":longitude, :latitude, :altitude, :groundspeed, "
+                      ":verticalaccuracy, :horizontalaccuracy )");
+        qDebug() << "Query prepared: " << retVal;
+        query.bindValue(":trackid", trackID );
+        query.bindValue(":pointid", point->getID() );
+        query.bindValue(":longitude", point->coordinate().longitude());
+        query.bindValue(":latitude", point->coordinate().latitude());
+        query.bindValue(":altitude", point->coordinate().altitude());
+        query.bindValue(":groundspeed", point->attribute(QGeoPositionInfo::GroundSpeed));
+        query.bindValue(":verticalaccuracy", point->attribute(QGeoPositionInfo::VerticalAccuracy));
+        query.bindValue(":horizontalaccuracy", point->attribute(QGeoPositionInfo::HorizontalAccuracy));
+
+        qDebug() << query.lastQuery();
+
+        // Execute the query with all values
+        query.exec();
+    }
+    delete(track);
+}
+
+int TrackingDatabase::getNewTrackID()
+{
+    // FIXME
+    return 1;
 }
